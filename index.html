@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="./assets/images/favicon-32x32.png"
+    />
+    <title>Frontend Mentor | Browser extensions manager UI</title>
+    <style>
+      .attribution {
+        font-size: 11px;
+        text-align: center;
+      }
+      .attribution a {
+        background-color: hsl(228, 45%, 44%);
+      }
+      .container {
+        padding: 50px;
+        display: flex;
+        flex-direction: column;
+        background-color: #050a1c;
+        color: #b2b7bf;
+      }
+      .heading {
+        padding: 10px;
+        background-color: #1f2535;
+        margin-bottom: 25px;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .heading img {
+        color: white;
+      }
+      .heading-icon {
+        background-color: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        border-radius: 50%;
+        transition: background-color 0.3s ease;
+      }
+      .heading-icon:hover {
+        background-color: #f65a55;
+      }
+      body.light-mode .heading-icon:hover {
+        background-color: #555;
+      }
+
+      .extensions-list-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .extensions-list-container-button button {
+        border-radius: 999px;
+        width: 3.8rem;
+        height: 2rem;
+        background-color: #2e344a;
+        border: none;
+        transition: all 0.3s ease;
+        color: white;
+      }
+      .extensions-list-container-button button:hover {
+        background-color: #f65a55;
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
+      .tools-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+      .tool {
+        height: 20vh;
+        width: 30%;
+        background-color: #1f2535;
+        margin-top: 15px;
+        border-radius: 10px;
+        display: flex;
+        flex-wrap: wrap;
+      }
+      .tool img {
+        height: 5vh;
+      }
+      .tools-header {
+        display: flex;
+      }
+      .tools-header img {
+        padding: 10px;
+      }
+      .tools-header-details {
+        padding: 10px;
+      }
+      .tools-container-details {
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+        padding: 25px;
+      }
+      .tools-container-details button {
+        border-radius: 999px;
+        width: 4.5rem;
+        height: 2rem;
+        background-color: #2e344a;
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+      }
+      .tools-container-details button:hover {
+        background-color: #f65a55;
+        transform: scale(1.05);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 34px;
+        height: 18px;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        background-color: #ccc;
+        border-radius: 18px;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transition: 0.4s;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 14px;
+        width: 14px;
+        left: 3px;
+        bottom: 3px;
+        background-color: #2e344a;
+        border-radius: 50%;
+        transition: 0.4s;
+      }
+      input:checked + .slider {
+        background-color: #f65a55;
+      }
+      input:checked + .slider:before {
+        transform: translateX(14px);
+      }
+
+      body.light-mode {
+        background-color: #f0f0f0;
+        color: #111;
+      }
+
+      body.light-mode .container {
+        background-color: white;
+        color: #333;
+      }
+
+      body.light-mode .tool {
+        background-color: #e4e4e4;
+      }
+
+      body.light-mode .heading,
+      body.light-mode .tools-container-details button,
+      body.light-mode .extensions-list-container-button button {
+        background-color: #ddd;
+        color: #000;
+      }
+
+      body.light-mode .tools-container-details button:hover,
+      body.light-mode .extensions-list-container-button button:hover {
+        background-color: #f65a55;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="heading">
+        <img src="/assets/images/logo.svg" />
+        <button class="heading-icon" id="themeToggle">
+          <img src="/assets/images/icon-moon.svg" />
+        </button>
+      </div>
+      <div class="extensions-list-container">
+        <h2>Extensions List</h2>
+        <div class="extensions-list-container-button">
+          <button onclick="handleAll()">All</button>
+          <button onclick="handleActive()">Active</button>
+          <button onclick="handleInactive()">Inactive</button>
+        </div>
+      </div>
+      <div class="tools-container" id="tools-container"></div>
+    </div>
+    <div class="attribution">
+      Challenge by
+      <a href="https://www.frontendmentor.io?ref=challenge">Frontend Mentor</a>.
+      Coded by <a href="#">Your Name Here</a>.
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        let toolsData = [];
+
+        fetch("/data.json")
+          .then((response) => response.json())
+          .then((data) => {
+            toolsData = data;
+            renderTools(toolsData);
+          })
+          .catch((error) => {
+            document.getElementById("tools-container").innerText =
+              "Failed to load JSON.";
+            console.error(error);
+          });
+
+        function renderTools(data) {
+          const container = document.getElementById("tools-container");
+          container.innerHTML = "";
+
+          data.forEach((tool, index) => {
+            const div = document.createElement("div");
+            div.className = "tool";
+
+            const checkedAttr = tool.isActive ? "checked" : "";
+
+            div.innerHTML = `
+              <div class="tools-header">
+                <img src="${tool.logo}" alt="${tool.name}" />
+                <div class="tools-header-details">
+                  <strong>${tool.name}</strong><br>${tool.description}
+                </div>
+              </div>
+              <div class="tools-container-details">
+                <button class="remove-btn" data-index="${index}">Remove</button>
+                <label class="switch">
+                  <input type="checkbox" class="toggleSwitch" data-index="${index}" ${checkedAttr}>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            `;
+            container.appendChild(div);
+          });
+
+          document.querySelectorAll(".toggleSwitch").forEach((checkbox) => {
+            checkbox.addEventListener("change", (event) => {
+              const index = event.target.dataset.index;
+              toolsData[index].isActive = event.target.checked;
+              console.log(
+                `"${toolsData[index].name}" toggled to`,
+                toolsData[index].isActive
+              );
+            });
+          });
+
+          document.querySelectorAll(".remove-btn").forEach((button) => {
+            button.addEventListener("click", (event) => {
+              const index = event.target.dataset.index;
+              toolsData.splice(index, 1);
+              renderTools(toolsData);
+            });
+          });
+        }
+
+        window.handleActive = () => {
+          const activeTools = toolsData.filter((tool) => tool.isActive);
+          renderTools(activeTools);
+        };
+
+        window.handleInactive = () => {
+          const inactiveTools = toolsData.filter((tool) => !tool.isActive);
+          renderTools(inactiveTools);
+        };
+
+        window.handleAll = () => {
+          renderTools(toolsData);
+        };
+
+        const icon = document.querySelector("#themeToggle img");
+        document.getElementById("themeToggle").addEventListener("click", () => {
+          document.body.classList.toggle("light-mode");
+          icon.src = document.body.classList.contains("light-mode")
+            ? "/assets/images/icon-sun.svg"
+            : "/assets/images/icon-moon.svg";
+        });
+      });
+    </script>
+  </body>
+</html>
